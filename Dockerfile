@@ -95,6 +95,8 @@ RUN cpanm --notest Spreadsheet::XLSX
 
 RUN apt-get install -y libapache2-mod-php
 
+RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem && mv global-bundle.pem /etc/ssl/certs/
+
 RUN a2enmod rewrite cgi
 RUN a2dissite 000-default
 RUN a2enmod proxy_http
