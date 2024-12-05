@@ -92,6 +92,7 @@ RUN cpanm --notest XML::Simple
 RUN cpanm --notest XML::XPath
 RUN cpanm --notest Crypt::Bcrypt
 RUN cpanm --notest Spreadsheet::XLSX
+RUN cpanm --notest Spreadsheet::ParseXLSX
 
 RUN apt-get install -y libapache2-mod-php
 
