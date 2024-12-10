@@ -1,4 +1,4 @@
-FROM debian:11
+FROM debian:10
 LABEL MAINTAINER="Ahwalian M <ahwalian@rschooltoday.com>"
 
 ARG PERLBREW_ROOT=/usr/local/perl
@@ -93,6 +93,7 @@ RUN cpanm --notest XML::XPath
 RUN cpanm --notest Crypt::Bcrypt
 RUN cpanm --notest Spreadsheet::XLSX
 RUN cpanm --notest Spreadsheet::ParseXLSX
+RUN cpanm --notest DBD::MariaDB
 
 RUN apt-get install -y libapache2-mod-php
 
