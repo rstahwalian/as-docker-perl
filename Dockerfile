@@ -59,6 +59,7 @@ RUN cpanm --notest Crypt::SSLeay
 RUN cpanm --notest Data::Dumper
 RUN cpanm --notest Data::Printer
 RUN cpanm --notest Data::ICal
+RUN cpanm --notest Data::ICal::TimeZone
 RUN cpanm --notest Date::Calc
 RUN cpanm --notest Date::ICal
 RUN cpanm --notest Date::Manip
