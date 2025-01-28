@@ -60,6 +60,7 @@ RUN cpanm --notest Data::Dumper
 RUN cpanm --notest Data::Printer
 RUN cpanm --notest Data::ICal
 RUN cpanm --notest Date::Calc
+RUN cpanm --notest Date::ICal
 RUN cpanm --notest Date::Manip
 RUN cpanm --notest Date::Format
 RUN cpanm --notest DBD::mysql@4.050
