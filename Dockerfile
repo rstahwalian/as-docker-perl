@@ -1,4 +1,4 @@
-FROM debian:10
+FROM debian:11
 LABEL MAINTAINER="Ahwalian M <ahwalian@rschooltoday.com>"
 
 ARG PERLBREW_ROOT=/usr/local/perl
@@ -25,7 +25,7 @@ RUN apt-get install -y git
 ## Install ImageMagick
 RUN pwd
 RUN cd /usr/local/share/
-RUN git clone -b '7.1.1-41' --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
+RUN git clone -b '7.1.1-39' --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
 RUN cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib
 
 # RUN wget https://imagemagick.org/archive/ImageMagick.tar.gz
@@ -95,9 +95,9 @@ RUN cpanm --notest XML::XPath
 RUN cpanm --notest Crypt::Bcrypt
 RUN cpanm --notest Spreadsheet::XLSX
 RUN cpanm --notest Spreadsheet::ParseXLSX
-RUN cpanm --notest DBD::MariaDB
 
 RUN apt-get install -y libapache2-mod-php
+RUN apt-get install -y default-mysql-client
 
 RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem && mv global-bundle.pem /etc/ssl/certs/
 
