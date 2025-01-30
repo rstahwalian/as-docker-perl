@@ -14,18 +14,17 @@ RUN apt-get install -y perl-doc libpath-tiny-perl cpanminus
 RUN apt-get install -y librest-client-perl libxml-parser-perl
 RUN apt-get install -y openssl libssl-dev libnet-ssleay-perl libcrypt-ssleay-perl
 RUN apt-get install -y zlib1g-dev libexpat1-dev default-libmysqlclient-dev 
-
+RUN apt-get install -y git libapache2-mod-php default-mysql-client
 RUN apt-get install -y tzdata
 # Set timezone to be CST6CDT or America/Chicago
 ENV TZ="America/Chicago"
 
 #RUN apt-get install -y imagemagick perlmagick libimage-magick-perl
 
-RUN apt-get install -y git
 ## Install ImageMagick
 RUN pwd
 RUN cd /usr/local/share/
-RUN git clone -b '7.1.1-43' --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
+RUN git clone -b '7.1.1-41' --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
 RUN cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib
 
 # RUN wget https://imagemagick.org/archive/ImageMagick.tar.gz
@@ -95,9 +94,6 @@ RUN cpanm --notest XML::XPath
 RUN cpanm --notest Crypt::Bcrypt
 RUN cpanm --notest Spreadsheet::XLSX
 RUN cpanm --notest Spreadsheet::ParseXLSX
-
-RUN apt-get install -y libapache2-mod-php
-RUN apt-get install -y default-mysql-client
 
 RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem && mv global-bundle.pem /etc/ssl/certs/
 
