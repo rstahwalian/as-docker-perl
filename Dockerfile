@@ -31,7 +31,7 @@ RUN cd /usr/local/share/
 RUN wget https://imagemagick.org/archive/ImageMagick.tar.gz
 RUN tar -xvzf ImageMagick.tar.gz
 RUN rm ImageMagick.tar.gz
-RUN cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib
+RUN cd ImageMagick-7.1.1-43 && ./configure && make && make install && ldconfig /usr/local/lib
 
 # Install PerlBrew
 RUN mkdir -p $PERLBREW_ROOT
