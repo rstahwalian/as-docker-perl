@@ -25,7 +25,7 @@ RUN apt-get install -y git
 ## Install ImageMagick
 RUN pwd
 RUN cd /usr/local/share/
-RUN git clone --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
+RUN git clone -b '7.1.1-43' --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
 RUN cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib
 
 # RUN wget https://imagemagick.org/archive/ImageMagick.tar.gz
