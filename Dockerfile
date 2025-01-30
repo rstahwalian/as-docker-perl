@@ -1,51 +1,81 @@
-FROM debian:11
+# Use tonistiigi/xx for multiarch builds
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:latest AS xx
+
+# Set up the build environment
+FROM --platform=$BUILDPLATFORM debian:11 AS build
+
 LABEL MAINTAINER="Ahwalian M <ahwalian@rschooltoday.com>"
 
-ARG PERLBREW_ROOT=/usr/local/perl
-ARG PERL_VERSION=5.14.4
-# Enable perl build options. Example: --build-arg PERL_BUILD="--thread --debug"
-ARG PERL_BUILD=--thread
+COPY --from=xx / /
+
+ARG TARGETPLATFORM
+
+#RUN xx-info env
 
 RUN apt-get update
-RUN apt-get install -y perl bzip2 zip curl
-RUN apt-get install -y build-essential procps
-RUN apt-get install -y apache2 nano gcc wget libcgi-pm-perl libdbi-perl
-RUN apt-get install -y perl-doc libpath-tiny-perl cpanminus
-RUN apt-get install -y librest-client-perl libxml-parser-perl
-RUN apt-get install -y openssl libssl-dev libnet-ssleay-perl libcrypt-ssleay-perl
-RUN apt-get install -y zlib1g-dev libexpat1-dev default-libmysqlclient-dev 
-RUN apt-get install -y git libapache2-mod-php default-mysql-client
-RUN apt-get install -y tzdata
+RUN apt-get install -y \
+    apache2 \
+    bzip2 \
+    build-essential \
+    cpanminus \
+    curl \
+    default-libmysqlclient-dev \
+    default-mysql-client \
+    gcc \
+    git \
+    libcgi-pm-perl \
+    libcrypt-ssleay-perl \
+    libdbi-perl \
+    libexpat1-dev \
+    libnet-ssleay-perl \
+    libpath-tiny-perl \
+    librest-client-perl \
+    libssl-dev \
+    libxml-parser-perl \
+    libapache2-mod-php \
+    nano \
+    openssl \
+    perl \
+    perl-doc \
+    procps \
+    tzdata \
+    wget \
+    zip \
+    zlib1g-dev
+RUN rm -rf /var/lib/apt/lists/*
+
 # Set timezone to be CST6CDT or America/Chicago
 ENV TZ="America/Chicago"
 
-#RUN apt-get install -y imagemagick perlmagick libimage-magick-perl
-
 ## Install ImageMagick
-RUN pwd
 RUN cd /usr/local/share/
-RUN git clone -b '7.1.1-41' --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
+RUN git clone --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
 RUN cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib
 
 # RUN wget https://imagemagick.org/archive/ImageMagick.tar.gz
 # RUN tar -xvzf ImageMagick.tar.gz
 # RUN rm ImageMagick.tar.gz
-# RUN cd ImageMagick-7.1.1-43 && ./configure && make && make install && ldconfig /usr/local/lib
+# RUN cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib
 
 # Install PerlBrew
+ARG PERLBREW_ROOT=/usr/local/perl
+ARG PERL_VERSION=5.14.4
+# Enable perl build options. Example: --build-arg PERL_BUILD="--thread --debug"
+ARG PERL_BUILD=--thread
+
 RUN mkdir -p $PERLBREW_ROOT
 RUN bash -c '\curl -L https://install.perlbrew.pl | bash'
-ENV PATH $PERLBREW_ROOT/bin:$PATH
-ENV PERLBREW_PATH $PERLBREW_ROOT/bin
+ENV PATH=$PERLBREW_ROOT/bin:$PATH
+ENV PERLBREW_PATH=$PERLBREW_ROOT/bin
 RUN perlbrew --notest install $PERL_BUILD perl-$PERL_VERSION
 RUN perlbrew install-cpanm
 RUN bash -c 'source $PERLBREW_ROOT/etc/bashrc'
 
-ENV PERLBREW_ROOT $PERLBREW_ROOT
-ENV PATH $PERLBREW_ROOT/perls/perl-$PERL_VERSION/bin:$PATH
-ENV PERLBREW_PERL perl-$PERL_VERSION
-ENV PERLBREW_MANPATH $PELRBREW_ROOT/perls/perl-$PERL_VERSION/man
-ENV PERLBREW_SKIP_INIT 1
+ENV PERLBREW_ROOT=$PERLBREW_ROOT
+ENV PATH=$PERLBREW_ROOT/perls/perl-$PERL_VERSION/bin:$PATH
+ENV PERLBREW_PERL=perl-$PERL_VERSION
+ENV PERLBREW_MANPATH=$PELRBREW_ROOT/perls/perl-$PERL_VERSION/man
+ENV PERLBREW_SKIP_INIT=1
 
 RUN ln -s $PERLBREW_ROOT/perls/perl-$PERL_VERSION/bin/perl /usr/local/bin/perl
 
