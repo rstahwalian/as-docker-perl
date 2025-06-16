@@ -1,137 +1,181 @@
-# Use tonistiigi/xx for multiarch builds
-FROM --platform=$BUILDPLATFORM tonistiigi/xx:latest AS xx
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.6.1 AS xx
 
-# Set up the build environment
-FROM --platform=$BUILDPLATFORM debian:11 AS build
+FROM --platform=$BUILDPLATFORM debian:10 AS build
 
-LABEL MAINTAINER="Ahwalian M <ahwalian@rschooltoday.com>"
+LABEL MAINTAINER="Ahwalian Masykur <ahwalian@rschooltoday.com>"
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Import cross toolchain and setup env vars
 COPY --from=xx / /
 
-ARG TARGETPLATFORM
-
-#RUN xx-info env
-
-RUN apt-get update
-RUN apt-get install -y \
-    apache2 \
-    bzip2 \
+# Install build and runtime dependencies, clean up apt cache in one layer
+RUN apt-get update && apt-get install -y \
+    autoconf \
+    bash \
+    bison \
     build-essential \
+    ca-certificates \
+    clang \
     cpanminus \
     curl \
     default-libmysqlclient-dev \
     default-mysql-client \
-    gcc \
     git \
+    libatomic1 \
+    libcurl4-openssl-dev \
     libcgi-pm-perl \
     libcrypt-ssleay-perl \
+    libdate-manip-perl \
     libdbi-perl \
     libexpat1-dev \
-    libnet-ssleay-perl \
-    libpath-tiny-perl \
+    libimage-magick-perl \
+    libonig-dev \
+    libpcre3-dev \
+    libperl-dev \
     librest-client-perl \
+    libsqlite3-dev \
     libssl-dev \
-    libxml-parser-perl \
-    libapache2-mod-php \
+    libtool \
+    libxml-simple-perl \
+    libxml2-dev \
+    libxslt1-dev \
+    libzip-dev \
     nano \
-    openssl \
-    perl \
-    perl-doc \
+    pkg-config \
     procps \
+    re2c \
     tzdata \
     wget \
-    zip \
-    zlib1g-dev
-RUN rm -rf /var/lib/apt/lists/*
+    zlib1g-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set timezone to be CST6CDT or America/Chicago
+RUN xx-info
+
+# Define versions
+ARG APACHE_VERSION=2.4.63
+ARG MOD_PERL_VERSION=2.0.13
+ARG PHP_VERSION=8.4.7
+ARG APR_VERSION=1.7.6
+ARG APR_UTIL_VERSION=1.6.3
+
+WORKDIR /build
+
+# Download and build Apache with prefork MPM
+RUN wget https://downloads.apache.org/httpd/httpd-${APACHE_VERSION}.tar.gz && \
+    wget https://downloads.apache.org/apr/apr-${APR_VERSION}.tar.gz && \
+    wget https://downloads.apache.org/apr/apr-util-${APR_UTIL_VERSION}.tar.gz && \
+    tar xzf httpd-${APACHE_VERSION}.tar.gz && \
+    tar xzf apr-${APR_VERSION}.tar.gz && \
+    tar xzf apr-util-${APR_UTIL_VERSION}.tar.gz && \
+    mv apr-${APR_VERSION} httpd-${APACHE_VERSION}/srclib/apr && \
+    mv apr-util-${APR_UTIL_VERSION} httpd-${APACHE_VERSION}/srclib/apr-util && \
+    cd httpd-${APACHE_VERSION} && \
+    ./configure --enable-so --enable-cgi --enable-mods-shared=all --with-included-apr --with-mpm=prefork && \
+    make -j$(nproc) && make install
+
+# Build mod_perl with Registry and RegistryPrefork support
+RUN wget https://downloads.apache.org/perl/mod_perl-${MOD_PERL_VERSION}.tar.gz && \
+    tar xzf mod_perl-${MOD_PERL_VERSION}.tar.gz && \
+    cd mod_perl-${MOD_PERL_VERSION} && \
+    /usr/bin/perl Makefile.PL MP_APXS=/usr/local/apache2/bin/apxs MP_USE_DSO=1 && \
+    make -j$(nproc) && make install
+
+RUN ln -sf /usr/bin/perl /usr/local/bin/perl
+
+# Build PHP
+RUN wget https://www.php.net/distributions/php-${PHP_VERSION}.tar.gz && \
+    tar xzf php-${PHP_VERSION}.tar.gz && \
+    cd php-${PHP_VERSION} && \
+    ./configure --with-apxs2=/usr/local/apache2/bin/apxs \
+        --with-mysqli --with-zlib --enable-mbstring --with-xsl --with-openssl && \
+    make -j$(nproc) && make install
+
+# Clean up build artifacts
+RUN cd / && rm -rf /build
+
+# Install ImageMagick from source and clean up
+RUN mkdir -p /usr/local/share && cd /usr/local/share && \
+    git clone --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick && \
+    cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib && \
+    cd / && rm -rf /usr/local/share/ImageMagick
+
 ENV TZ="America/Chicago"
 
-## Install ImageMagick
-RUN cd /usr/local/share/
-RUN git clone --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick
-RUN cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib
+# Install all Perl modules in one layer
+RUN cpanm --notest \
+    Archive::Zip \
+    Authen::SASL \
+    Carp::Clan \
+    CGI \
+    CGI::Enurl \
+    CGI::HTMLError \
+    Class::ReturnValue \
+    Class::Singleton \
+    Crypt::Bcrypt \
+    Crypt::RC4 \
+    Crypt::TripleDES \
+    Crypt::SSLeay \
+    Data::Dumper \
+    Data::Printer \
+    Data::ICal \
+    Data::ICal::TimeZone \
+    Date::Calc \
+    Date::ICal \
+    Date::Leapyear \
+    Date::Manip \
+    Date::Format \
+    DBD::mysql@4.050 \
+    Digest::HMAC \
+    Digest::Perl::MD5 \
+    Graphics::ColorUtils \
+    ExtUtils::Installed \
+    HTML::CalendarMonth \
+    HTTP::Cookies \
+    HTTP::Date \
+    HTML::TreeBuilder \
+    HTML::Parser \
+    HTML::FormatText \
+    HTTP::Message \
+    IO::Socket::SSL \
+    Image::Magick \
+    OLE::Storage_Lite \
+    Params::Validate \
+    REST::Client \
+    JSON \
+    LWP::UserAgent \
+    MailTools \
+    MIME::Entity \
+    MIME::Tools \
+    Net::HTTP \
+    Net::SMTP \
+    Net::SMTP_auth \
+    Net::SSLeay \
+    Spreadsheet::WriteExcel \
+    Spreadsheet::ParseExcel \
+    Text::CSV \
+    Text::CSV_XS \
+    Try::Tiny \
+    URI \
+    WWW::Mailgun \
+    XML::Generator \
+    XML::NamespaceSupport \
+    XML::SAX \
+    XML::SAX::Base \
+    XML::SAX::Expat \
+    XML::Simple \
+    XML::XPath \
+    Spreadsheet::XLSX \
+    Spreadsheet::ParseXLSX \
+    Spreadsheet::WriteExcel
 
-# RUN wget https://imagemagick.org/archive/ImageMagick.tar.gz
-# RUN tar -xvzf ImageMagick.tar.gz
-# RUN rm ImageMagick.tar.gz
-# RUN cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib
+# Install AWS RDS global SSL cert
+RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O /etc/ssl/certs/global-bundle.pem
 
-# Install PerlBrew
-ARG PERLBREW_ROOT=/usr/local/perl
-ARG PERL_VERSION=5.14.4
-# Enable perl build options. Example: --build-arg PERL_BUILD="--thread --debug"
-ARG PERL_BUILD=--thread
+# Copy Apache configuration (ensure mod_perl RegistryPrefork is enabled in conf)
+COPY apache2/conf /usr/local/apache2/conf/
 
-RUN mkdir -p $PERLBREW_ROOT
-RUN bash -c '\curl -L https://install.perlbrew.pl | bash'
-ENV PATH=$PERLBREW_ROOT/bin:$PATH
-ENV PERLBREW_PATH=$PERLBREW_ROOT/bin
-RUN perlbrew --notest install $PERL_BUILD perl-$PERL_VERSION
-RUN perlbrew install-cpanm
-RUN bash -c 'source $PERLBREW_ROOT/etc/bashrc'
-
-ENV PERLBREW_ROOT=$PERLBREW_ROOT
-ENV PATH=$PERLBREW_ROOT/perls/perl-$PERL_VERSION/bin:$PATH
-ENV PERLBREW_PERL=perl-$PERL_VERSION
-ENV PERLBREW_MANPATH=$PELRBREW_ROOT/perls/perl-$PERL_VERSION/man
-ENV PERLBREW_SKIP_INIT=1
-
-RUN ln -s $PERLBREW_ROOT/perls/perl-$PERL_VERSION/bin/perl /usr/local/bin/perl
-
-RUN cpanm --notest Archive::Zip
-RUN cpanm --notest CGI
-RUN cpanm --notest CGI::Enurl
-RUN cpanm --notest Crypt::RC4
-RUN cpanm --notest Crypt::TripleDES
-RUN cpanm --notest Crypt::SSLeay
-RUN cpanm --notest Data::Dumper
-RUN cpanm --notest Data::Printer
-RUN cpanm --notest Data::ICal
-RUN cpanm --notest Data::ICal::TimeZone
-RUN cpanm --notest Date::Calc
-RUN cpanm --notest Date::ICal
-RUN cpanm --notest Date::Manip
-RUN cpanm --notest Date::Format
-RUN cpanm --notest DBD::mysql@4.050
-RUN cpanm --notest ExtUtils::Installed
-RUN cpanm --notest HTML::CalendarMonth
-RUN cpanm --notest HTTP::Cookies
-RUN cpanm --notest HTML::TreeBuilder
-RUN cpanm --notest HTML::Parser
-RUN cpanm --notest HTML::FormatText
-RUN cpanm --notest Image::Magick
-RUN cpanm --notest REST::Client
-RUN cpanm --notest JSON
-RUN cpanm --notest LWP::UserAgent
-RUN cpanm --notest MIME::Entity
-RUN cpanm --notest MIME::Tools
-RUN cpanm --notest Net::SMTP
-RUN cpanm --notest Net::SMTP_auth
-RUN cpanm --notest Spreadsheet::WriteExcel
-RUN cpanm --notest Spreadsheet::ParseExcel
-RUN cpanm --notest Text::CSV
-RUN cpanm --notest Text::CSV_XS
-RUN cpanm --notest URI@1.74
-RUN cpanm --notest WWW::Mailgun
-RUN cpanm --notest XML::Generator
-RUN cpanm --notest XML::NamespaceSupport
-RUN cpanm --notest XML::SAX
-RUN cpanm --notest XML::SAX::Base
-RUN cpanm --notest XML::SAX::Expat
-RUN cpanm --notest XML::Simple
-RUN cpanm --notest XML::XPath
-RUN cpanm --notest Crypt::Bcrypt
-RUN cpanm --notest Spreadsheet::XLSX
-RUN cpanm --notest Spreadsheet::ParseXLSX
-
-RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem && mv global-bundle.pem /etc/ssl/certs/
-
-RUN a2enmod rewrite cgi
-RUN a2dissite 000-default
-RUN a2enmod proxy_http
-COPY apache2/ /etc/apache2
+# Expose HTTP port
 EXPOSE 80
-WORKDIR /var/www
 
-CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
+CMD ["/usr/local/apache2/bin/httpd", "-D", "FOREGROUND"]

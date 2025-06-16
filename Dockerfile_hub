@@ -1,8 +1,11 @@
-FROM rstahwalian/as-perl:5.14.4
-#FROM rstahwalian/as-perl:5.24.4
+FROM rstahwalian/as-perl:apache2modperl
 
-COPY apache2/ /etc/apache2
+# Copy Apache configuration
+COPY apache2/conf /usr/local/apache2/conf/
+
+WORKDIR /dwc
+
+# Expose HTTP port
 EXPOSE 80
-WORKDIR /var/www
 
-CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
+CMD ["/usr/local/apache2/bin/httpd", "-D", "FOREGROUND"]

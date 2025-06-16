@@ -27,4 +27,4 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: rstahwalian/as-perl:5.14.4
+          tags: rstahwalian/as-perl:apache2modperl
