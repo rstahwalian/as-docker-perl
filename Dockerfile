@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     libdbi-perl \
     libexpat1-dev \
     libimage-magick-perl \
+    libmagickcore-dev libmagickwand-dev libpng-dev \
     libonig-dev \
     libpcre3-dev \
     libperl-dev \
@@ -97,7 +98,7 @@ RUN cd / && rm -rf /build
 # Install ImageMagick from source and clean up
 RUN mkdir -p /usr/local/share && cd /usr/local/share && \
     git clone --depth 1 https://github.com/ImageMagick/ImageMagick.git ImageMagick && \
-    cd ImageMagick && ./configure && make && make install && ldconfig /usr/local/lib && \
+    cd ImageMagick && ./configure -with-perl && make && make install && ldconfig /usr/local/lib && \
     cd / && rm -rf /usr/local/share/ImageMagick
 
 ENV TZ="America/Chicago"
