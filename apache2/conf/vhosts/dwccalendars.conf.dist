@@ -1,0 +1,64 @@
+# <VirtualHost *:80>
+#     UseCanonicalName on
+#     DocumentRoot /dwc/dwccalendars/html
+#     ServerName dwccalendars.devel
+#     ServerAlias dwccalendars.devel www.dwccalendars.devel
+
+#     SetEnv PERL5LIB /dwc/dwccalendars/g5-bin/perllib:/dwc/codelibrary/Genie5.0/g5-bin/perllib:/dwc/codelibrary:/dwc/codelibrary.dtss/WI:/dwc/codelibrary/CLFIN/global:/dwc/codelibrary/CLFIN/payments:/dwc/codelibrary/EFT/perllib
+#     SetEnv G5genie 17
+
+#     <IfModule mod_perl.c>
+#         PerlSwitches -I/dwc/dwccalendars/g5-bin/perllib
+#     #     <Perl>
+#     #         use lib "/dwc/dwccalendars/g5-bin/perllib";
+#     #     </Perl>
+#     </IfModule>
+
+#     Alias /images /dwc/dwccalendars/images
+#     Alias /templates /dwc/dwccalendars/templates
+#     Alias /schemes /dwc/dwccalendars/schemes
+#     Alias /g5-bin /dwc/dwccalendars/g5-bin
+#     ErrorDocument 404 /dwc/codelibrary/re404.cgi
+    
+#     ErrorLog "/usr/local/apache2/logs/dwccalendars_error.log"
+#     TransferLog "/usr/local/apache2/logs/dwccalendars_access.log"
+
+#     ##### USE THIS FOR MOD_PERL #####
+#     # <directory /dwc/dwccalendars/g5-bin>
+#     #     SetHandler perl-script
+#     #     PerlResponseHandler ModPerl::RegistryPrefork
+#     #     PerlOptions +ParseHeaders
+#     #     Options +ExecCGI
+#     #     Require all granted
+#     # </directory>
+#     #####################
+
+#     ##### USE THIS FOR CGI #####
+#     ScriptAlias /g5-bin/ /dwc/dwccalendars/g5-bin/
+#     <Directory /dwc/dwccalendars/g5-bin>
+#         AddHandler cgi-script .pl .cgi
+#         AllowOverride Indexes
+#         Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch
+#         Require all granted
+#     </Directory>
+#     #####################
+
+#     ### start reverse proxy config to php school PV app
+#     RewriteRule ^/public/(.*$) http://public.devel/$1 [proxy] 
+#     <Location /public/> 
+#         SetEnv force-proxy-request-1.0 1 
+#         SetEnv proxy-nokeepalive 1 
+#         SetEnv proxy-initial-not-pooled 1 
+#         ProxyPass        http://public.devel/
+#         ProxyPassReverse http://public.devel/
+#         Require all granted 
+#      </Location>
+
+#     <Directory "/dwc/dwccalendars/html">
+#         RewriteEngine on
+#         RewriteBase     /
+#         RewriteRule     ^admin/*$       http://dwccalendars.devel/g5-bin/setup.cgi?G5genie=17 [L,R]
+#         RewriteRule     ^/*$            http://dwccalendars.devel/g5-bin/client.cgi?G5genie=17
+#         RewriteRule     ^index/*$       http://dwccalendars.devel/g5-bin/client.cgi?G5genie=17
+#     </Directory>
+# </VirtualHost>

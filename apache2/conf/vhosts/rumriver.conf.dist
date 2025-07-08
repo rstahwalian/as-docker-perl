@@ -1,0 +1,56 @@
+# <VirtualHost *:80>
+#     UseCanonicalName on
+# 	DocumentRoot /dwc/rumriver/html
+#     ServerName rumriver.devel
+#     ServerAlias rumriver.devel www.rumriver.devel
+
+#     SetEnv PERL5LIB /dwc/rumriver/g5-bin/perllib:/dwc/codelibrary/Genie5.0/g5-bin/perllib:/dwc/codelibrary:/dwc/codelibrary.dtss/WI:/dwc/codelibrary/CLFIN/global:/dwc/codelibrary/CLFIN/payments:/dwc/codelibrary/EFT/perllib
+#     SetEnv G5genie 12
+
+#     <IfModule mod_perl.c>
+#       PerlSwitches -I/dwc/rumriver/g5-bin/perllib
+#         #<Perl>
+#         #    use lib "/dwc/rumriver/g5-bin/perllib";
+#         #</Perl>
+#     </IfModule>
+
+#     Alias /images /dwc/rumriver/images
+#     Alias /templates /dwc/rumriver/templates
+#     Alias /schemes /dwc/rumriver/schemes
+#     Alias /g5-bin /dwc/rumriver/g5-bin
+#     ErrorDocument 404 /dwc/codelibrary/re404.cgi
+    
+#     ErrorLog "/usr/local/apache2/logs/rumriver_error.log"
+# 	TransferLog "/usr/local/apache2/logs/rumriver_access.log"
+
+#     ##### USE THIS FOR MOD_PERL #####
+#     # <directory /dwc/rumriver/g5-bin>
+#     #     SetHandler perl-script
+#     #     PerlResponseHandler ModPerl::Registry
+#     #     PerlOptions +ParseHeaders
+#     #     Options +ExecCGI
+#     #     Require all granted
+#     # </directory>
+#     #####################
+
+#     ##### USE THIS FOR CGI #####
+#     ScriptAlias /g5-bin/ /dwc/rumriver/g5-bin/
+#     <Directory /dwc/rumriver/g5-bin>
+#         AddHandler cgi-script .pl .cgi
+#         AllowOverride Indexes
+#         Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch
+#         Require all granted
+#     </Directory>
+#     #####################
+
+#     ProxyPass /public/ http://public.devel/ timeout=300
+#     ProxyPassReverse /public/ http://public.devel/ timeout=300
+    
+#     <Directory "/dwc/rumriver/html">
+#         RewriteEngine on
+#         RewriteBase     /
+#         RewriteRule     ^admin/*$       http://rumriver.devel/g5-bin/setup.cgi?G5genie=12 [L,R]
+#         RewriteRule     ^/*$            http://rumriver.devel/g5-bin/client.cgi?G5genie=12
+#         RewriteRule     ^index/*$       http://rumriver.devel/g5-bin/client.cgi?G5genie=12
+#     </Directory>
+# </VirtualHost>

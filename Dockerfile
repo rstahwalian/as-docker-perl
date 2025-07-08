@@ -176,6 +176,8 @@ RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O
 # Copy Apache configuration (ensure mod_perl RegistryPrefork is enabled in conf)
 COPY apache2/conf /usr/local/apache2/conf/
 
+WORKDIR /dwc
+
 # Expose HTTP port
 EXPOSE 80
 
