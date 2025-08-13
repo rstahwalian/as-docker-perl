@@ -46,6 +46,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     procps \
     re2c \
+    redis-tools \
     tzdata \
     wget \
     zlib1g-dev \
@@ -111,6 +112,8 @@ RUN cpanm --notest \
     CGI \
     CGI::Enurl \
     CGI::HTMLError \
+    CGI::Session \
+    CGI::Session::Driver::redis \
     Class::ReturnValue \
     Class::Singleton \
     Crypt::Bcrypt \
@@ -142,6 +145,7 @@ RUN cpanm --notest \
     Image::Magick \
     OLE::Storage_Lite \
     Params::Validate \
+    Redis \
     REST::Client \
     JSON \
     LWP::UserAgent \
