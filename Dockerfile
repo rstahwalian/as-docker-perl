@@ -9,6 +9,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Import cross toolchain and setup env vars
 COPY --from=xx / /
 
+RUN sed -i 's|deb.debian.org|archive.debian.org|g' /etc/apt/sources.list && \
+    sed -i '/security.debian.org/d' /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99disable-check-valid-until
+    
 # Install build and runtime dependencies, clean up apt cache in one layer
 RUN apt-get update && apt-get install -y \
     autoconf \
