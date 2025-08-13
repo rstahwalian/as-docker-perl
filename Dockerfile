@@ -41,6 +41,7 @@ RUN apt-get update && apt-get install -y \
     librest-client-perl \
     libsqlite3-dev \
     libssl-dev \
+    libhiredis-dev \
     libtool \
     libxml-simple-perl \
     libxml2-dev \
