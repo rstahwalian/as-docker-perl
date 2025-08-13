@@ -59,7 +59,7 @@ RUN apt-get update && apt-get install -y \
 RUN xx-info
 
 # Define versions
-ARG APACHE_VERSION=2.4.63
+ARG APACHE_VERSION=2.4.65
 ARG MOD_PERL_VERSION=2.0.13
 ARG PHP_VERSION=8.4.7
 ARG APR_VERSION=1.7.6
