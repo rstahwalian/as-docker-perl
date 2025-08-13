@@ -114,11 +114,12 @@ RUN cpanm --notest \
     Archive::Zip \
     Authen::SASL \
     Carp::Clan \
+    Redis \
     CGI \
-    CGI::Enurl \
-    CGI::HTMLError \
     CGI::Session \
     CGI::Session::Driver::redis \
+    CGI::Enurl \
+    CGI::HTMLError \
     Class::ReturnValue \
     Class::Singleton \
     Crypt::Bcrypt \
@@ -150,7 +151,6 @@ RUN cpanm --notest \
     Image::Magick \
     OLE::Storage_Lite \
     Params::Validate \
-    Redis \
     REST::Client \
     JSON \
     LWP::UserAgent \
