@@ -55,6 +55,7 @@ RUN apt-get update && apt-get install -y \
     tzdata \
     wget \
     zlib1g-dev \
+    redis-tools \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN xx-info
