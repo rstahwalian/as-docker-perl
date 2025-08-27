@@ -115,10 +115,7 @@ RUN cpanm --notest \
     Archive::Zip \
     Authen::SASL \
     Carp::Clan \
-    Redis \
     CGI \
-    CGI::Session \
-    CGI::Session::Driver::redis \
     CGI::Enurl \
     CGI::HTMLError \
     Class::ReturnValue \
@@ -178,7 +175,10 @@ RUN cpanm --notest \
     XML::XPath \
     Spreadsheet::XLSX \
     Spreadsheet::ParseXLSX \
-    Spreadsheet::WriteExcel
+    Spreadsheet::WriteExcel \
+    Redis \
+    CGI::Session \
+    CGI::Session::Driver::redis
 
 # Install AWS RDS global SSL cert
 RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O /etc/ssl/certs/global-bundle.pem
