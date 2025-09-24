@@ -178,7 +178,8 @@ RUN cpanm --notest \
     Spreadsheet::WriteExcel \
     Redis \
     CGI::Session \
-    CGI::Session::Driver::redis
+    CGI::Session::Driver::redis \
+    Paws
 
 # Install AWS RDS global SSL cert
 RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O /etc/ssl/certs/global-bundle.pem
@@ -186,9 +187,21 @@ RUN wget -c https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O
 # Copy Apache configuration (ensure mod_perl RegistryPrefork is enabled in conf)
 COPY apache2/conf /usr/local/apache2/conf/
 
+# Create the new home directory
+RUN mkdir -p /home/www-data && \
+    chown www-data:www-data /home/www-data
+RUN usermod -d /home/www-data www-data
+
+USER www-data
+
+RUN mkdir -p /home/www-data/.aws
+RUN chown -Rf www-data.www-data /home/www-data/.aws
+RUN chmod 775 -Rf /home/www-data/.aws
+
 WORKDIR /dwc
 
 # Expose HTTP port
 EXPOSE 80
+EXPOSE 443
 
 CMD ["/usr/local/apache2/bin/httpd", "-D", "FOREGROUND"]
